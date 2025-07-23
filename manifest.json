@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Text Formatter",
+  "version": "1.1",
+  "description": "Format LinkedIn posts with bold, italic, underline and bullet points using keyboard shortcuts.",
+  "permissions": [],
+  "host_permissions": [
+    "*://*.linkedin.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.linkedin.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}

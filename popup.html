@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LinkedIn Formatter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: 300px;
+            padding: 15px;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.2em;
+            color: #0077B5; /* LinkedIn blue */
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        p {
+            font-size: 1em;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .shortcut-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+        .shortcut-list li {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .shortcut-list li strong {
+            color: #005682;
+            font-weight: 500;
+        }
+        .shortcut-list li span {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: #eee;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 1em;
+            color: #414141;
+        }
+    </style>
+</head>
+<body>
+    <h1>LinkedIn text Formatter</h1>
+    <p>Select text in the LinkedIn post field and use these shortcuts, or use the floating toolbar:</p>
+
+    <h3 style="color: #0077B5; margin-top: 20px; margin-bottom: 10px; font-size: 1em;">Basic Shortcuts:</h3>
+    <ul class="shortcut-list">
+        <li>
+            <strong>Bold</strong>
+            <span>Cmd/Ctrl + B</span>
+        </li>
+        <li>
+            <strong>Italic</strong>
+            <span>Cmd/Ctrl + I</span>
+        </li>
+        <li>
+            <strong>Underline</strong>
+            <span>Cmd/Ctrl + U</span>
+        </li>
+        <li>
+            <strong>Bullet Points (•)</strong>
+            <span>Cmd/Ctrl + 8</span>
+        </li>
+        <li>
+            <strong>Bullet Points (-)</strong>
+            <span>Cmd/Ctrl + 7</span>
+        </li>
+    </ul>
+
+    <h3 style="color: #0077B5; margin-top: 20px; margin-bottom: 10px; font-size: 1em;">Advanced Combinations:</h3>
+    <ul class="shortcut-list">
+        <li>
+            <strong>Bold + Italic</strong>
+            <span>Cmd/Ctrl + Shift + B</span>
+        </li>
+        <li>
+            <strong>Bold + Underline</strong>
+            <span>Cmd/Ctrl + Shift + U</span>
+        </li>
+        <li>
+            <strong>Italic + Underline</strong>
+            <span>Cmd/Ctrl + Shift + I</span>
+        </li>
+        <li>
+            <strong>Bold + Italic + Underline</strong>
+            <span>Cmd/Ctrl + Shift + 7</span>
+        </li>
+    </ul>
+
+    <div style="margin-top: 20px; padding: 10px; background-color: #e8f5e8; border-radius: 5px; border: 1px solid #c0e0c0;">
+        <strong>💡 Tip:</strong> Select text to see the floating toolbar with clickable buttons!
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
