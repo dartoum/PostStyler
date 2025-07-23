@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "LinkedIn Text Formatter",
+  "name": "PostStyler",
   "version": "1.1",
-  "description": "Format LinkedIn posts with bold, italic, underline and bullet points using keyboard shortcuts.",
+  "description": "Make your LinkedIn posts stand out with styled text formatting.",
   "permissions": [],
   "host_permissions": [
     "*://*.linkedin.com/*"
