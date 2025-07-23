@@ -558,10 +558,8 @@ function createToolbar() {
         <div class="separator"></div>
         <button data-action="uppercase" title="UPPERCASE" style="font-size: 14px;">AA</button>
         <button data-action="lowercase" title="lowercase" style="font-size: 14px;">aa</button>
-        <div class="separator"></div>
-        <button data-action="clear-formatting" title="Verwijder opmaak (Clear formatting)" style="font-size: 15px;">✖️</button>
         <div style="flex: 1;"></div>
-        <button data-action="show-info" title="Toon info" style="font-size: 16px; font-weight: bold;">?</button>
+        <button data-action="clear-formatting" title="Verwijder opmaak (Clear formatting)" style="font-size: 15px;">✖️</button>
     `;
     
     // Add click handlers
@@ -612,10 +610,7 @@ function handleToolbarClick(event) {
         const selectedText = selection.toString();
         console.log('Selected text:', selectedText);
 
-        if (action === 'show-info') {
-            showInfoPopup();
-            return;
-        }
+        // Info button has been removed
         
         if (action === 'clear-formatting') {
             if (!selectedText) return;
@@ -800,87 +795,7 @@ function updateToolbarButtonStates(selectedText, toolbar) {
     // Functionaliteit uitgeschakeld - geen active states meer
     return;
 }
-// Show a popup with formatting options info
-function showInfoPopup() {
-    // Remove any existing popup
-    const old = document.getElementById('linkedin-formatter-info-popup');
-    if (old) old.remove();
-    
-    const popup = document.createElement('div');
-    popup.id = 'linkedin-formatter-info-popup';
-    popup.style.position = 'fixed';
-    popup.style.top = '50%';
-    popup.style.left = '50%';
-    popup.style.transform = 'translate(-50%, -50%)';
-    popup.style.background = '#f8f9fa';
-    popup.style.border = '1px solid #dee2e6';
-    popup.style.borderRadius = '8px';
-    popup.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
-    popup.style.padding = '12px 24px 24px 24px';
-    popup.style.zIndex = '99999';
-    popup.style.minWidth = '320px';
-    popup.style.maxWidth = '90vw';
-    popup.style.fontFamily = '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
-    
-    popup.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-            <div style="font-size: 18px; font-weight: 600; color: #343a40;">Formatting Options</div>
-            <div style="cursor: pointer; font-size: 18px; color: #6c757d; font-weight: bold; transition: color 0.2s; padding: 4px;" id="linkedin-formatter-close-x" onmouseover="this.style.color='#495057'" onmouseout="this.style.color='#6c757d'">&times;</div>
-        </div>
-        <div style="border-bottom: 1px solid #dee2e6; margin: 0 -24px 16px -24px;"></div>
-        <div style="font-size: 14px; line-height: 1.8; color: #495057;">
-            <p>Select text in your LinkedIn post and use the toolbar buttons to format your text.</p>
-            <p style="margin-bottom: 10px;">Available formatting options:</p>
-            <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center;">
-                <div style="text-align: center; font-size: 16px;">𝗕</div>
-                <div>Bold text</div>
-                
-                <div style="text-align: center; font-size: 16px;">𝘐</div>
-                <div>Italic text</div>
-                
-                <div style="text-align: center; font-size: 16px;">U</div>
-                <div>Underlined text</div>
-                
-                <div style="text-align: center; font-size: 16px;">•</div>
-                <div>Circle bullet points</div>
-                
-                <div style="text-align: center; font-size: 16px;">-</div>
-                <div>Hyphen bullet points</div>
-                
-                <div style="text-align: center; font-size: 16px;">1.</div>
-                <div>Numbered lists</div>
-                
-                <div style="text-align: center; font-size: 16px;">AA</div>
-                <div>UPPERCASE text</div>
-                
-                <div style="text-align: center; font-size: 16px;">aa</div>
-                <div>lowercase text</div>
-                
-                <div style="text-align: center; font-size: 16px;">✖️</div>
-                <div>Clear formatting</div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(popup);
-    
-    // Add close button functionality
-    const closeBtn = document.getElementById('linkedin-formatter-close-x');
-    if (closeBtn) {
-        closeBtn.onclick = () => popup.remove();
-    }
-    
-    // Also close on click outside
-    setTimeout(() => {
-        function outside(e) {
-            if (!popup.contains(e.target)) {
-                popup.remove();
-                document.removeEventListener('mousedown', outside);
-            }
-        }
-        document.addEventListener('mousedown', outside);
-    }, 100);
-}
+// Info popup functionality has been removed
 
 // Find and add toolbars to LinkedIn text areas
 function findAndAddToolbars() {
