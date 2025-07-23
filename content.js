@@ -239,6 +239,30 @@ function convertToBoldItalicUnderline(text) {
  * @param {string} text The input string to convert to plain text
  * @returns {string} Plain text without any Unicode formatting
  */
+/**
+ * Converts a given text string to uppercase.
+ * @param {string} text The input string to convert.
+ * @returns {string} The converted uppercase string.
+ */
+function convertToUppercase(text) {
+    // First convert to plain text to remove any formatting
+    let plain = convertToPlainText(text);
+    // Then convert to uppercase
+    return plain.toUpperCase();
+}
+
+/**
+ * Converts a given text string to lowercase.
+ * @param {string} text The input string to convert.
+ * @returns {string} The converted lowercase string.
+ */
+function convertToLowercase(text) {
+    // First convert to plain text to remove any formatting
+    let plain = convertToPlainText(text);
+    // Then convert to lowercase
+    return plain.toLowerCase();
+}
+
 function convertToPlainText(text) {
     // Quick check: als de text geen Unicode formatting karakters bevat, return origineel
     if (!(/[\u0332\u{1D400}-\u{1D7FF}•-]/u.test(text))) {
@@ -433,150 +457,7 @@ function getLinkedInPostInputField() {
     return postField;
 }
 
-/**
- * Handles the keyboard keydown event.
- * Checks for Cmd/Ctrl + B, I, U, 7, 8 shortcuts and applies formatting.
- * @param {KeyboardEvent} event The keyboard event object.
- */
-function handleKeyDown(event) {
-    // Check if Cmd (macOS) or Ctrl (Windows/Linux) is pressed.
-    const isModifierPressed = event.metaKey || event.ctrlKey;
-
-    if (!isModifierPressed) {
-        return; // Not a shortcut we're interested in
-    }
-
-    const inputField = getLinkedInPostInputField();
-
-    // Ensure we are in a LinkedIn post input field and it's the active element.
-    // This prevents the extension from interfering with other input fields or websites.
-    if (!inputField || document.activeElement !== inputField) {
-        return;
-    }
-
-    // Get the selected text.
-    let selectedText = '';
-    let selectionStart = 0;
-    let selectionEnd = 0;
-
-    // For contenteditable divs, we need to use the Selection API.
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        // Ensure the selection is within our target inputField
-        if (inputField.contains(range.commonAncestorContainer)) {
-            selectedText = selection.toString();
-            // Get the start and end offsets relative to the inputField's text content
-            const preSelectionRange = range.cloneRange();
-            preSelectionRange.selectNodeContents(inputField);
-            preSelectionRange.setEnd(range.startContainer, range.startOffset);
-            selectionStart = preSelectionRange.toString().length;
-            selectionEnd = selectionStart + selectedText.length;
-        }
-    }
-
-    if (!selectedText) {
-        return; // No text selected, do nothing.
-    }
-
-    let convertedText = '';
-    let handled = false;
-
-    // Bold+italic: Cmd/Ctrl+Shift+B
-    if ((event.key.toLowerCase() === 'b') && event.shiftKey) {
-        convertedText = convertToBoldItalic(selectedText);
-        handled = true;
-    } 
-    // Underline+Bold: Cmd/Ctrl+Shift+U
-    else if ((event.key.toLowerCase() === 'u') && event.shiftKey) {
-        convertedText = convertToUnderlineBold(selectedText);
-        handled = true;
-    }
-    // Underline+Italic: Cmd/Ctrl+Shift+I
-    else if ((event.key.toLowerCase() === 'i') && event.shiftKey) {
-        convertedText = convertToUnderlineItalic(selectedText);
-        handled = true;
-    }
-    // Bold+Italic+Underline: Cmd/Ctrl+Shift+7
-    else if ((event.key === '7') && event.shiftKey) {
-        convertedText = convertToBoldItalicUnderline(selectedText);
-        handled = true;
-    } 
-    else {
-        switch (event.key.toLowerCase()) {
-            case 'b':
-                // Toggle bold
-                convertedText = convertToBold(selectedText);
-                handled = true;
-                break;
-            case 'i':
-                // Toggle italic
-                convertedText = convertToItalic(selectedText);
-                handled = true;
-                break;
-            case 'u':
-                // Underline: overschrijft andere stijlen (laatste actie wint)
-                // Eerst ALLES naar plain tekst
-                let plain = convertToPlainText(selectedText);
-                convertedText = convertToMonospaceUnderline(plain);
-                handled = true;
-                break;
-            case '8': // Circle bullet (laatste actie wint)
-                convertedText = convertToCircleBulletPoints(selectedText);
-                handled = true;
-                break;
-            case '7': // Hyphen bullet (laatste actie wint)
-                convertedText = convertToHyphenBulletPoints(selectedText);
-                handled = true;
-                break;
-        }
-    }
-
-    if (handled && convertedText) {
-        event.preventDefault();
-        
-        console.log('Replacing text:', selectedText, '->', convertedText);
-        
-        try {
-            // Probeer eerst met document.execCommand
-            const success = document.execCommand('insertText', false, convertedText);
-            console.log('insertText success:', success);
-            
-            if (!success) {
-                // Fallback: directe manipulatie van de selection
-                const selection = window.getSelection();
-                if (selection.rangeCount > 0) {
-                    const range = selection.getRangeAt(0);
-                    range.deleteContents();
-                    
-                    // Maak een text node met de Unicode characters
-                    const textNode = document.createTextNode(convertedText);
-                    range.insertNode(textNode);
-                    
-                    // Zet cursor na de ingevoegde tekst
-                    range.setStartAfter(textNode);
-                    range.collapse(true);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                    
-                    console.log('Used fallback text insertion');
-                }
-            }
-            
-            // Update toolbar na keyboard shortcut
-            setTimeout(() => {
-                // Geen toolbar state update meer nodig
-            }, 50);
-            
-        } catch (e) {
-            console.error("Error executing text replacement:", e);
-        }
-    }
-}
-
-// Add the event listener to the document.
-// Using 'keydown' allows us to prevent default browser actions.
-document.addEventListener('keydown', handleKeyDown);
+// Keyboard shortcuts have been removed
 
 // --- Fixed Toolbar Implementation ---
 
@@ -663,21 +544,24 @@ function createToolbar() {
     const toolbar = document.createElement('div');
     toolbar.className = 'linkedin-formatter-toolbar';
     toolbar.innerHTML = `
-        <button data-action="bold" title="Bold (Cmd/Ctrl+B)" style="font-family: serif;">𝗕</button>
-        <button data-action="italic" title="Italic (Cmd/Ctrl+I)" style="font-family: serif;">𝘐</button>
-        <button data-action="underline" title="Underline (Cmd/Ctrl+U)" style="text-decoration: underline;">U</button>
+        <button data-action="bold" title="Bold" style="font-family: serif;">𝗕</button>
+        <button data-action="italic" title="Italic" style="font-family: serif;">𝘐</button>
+        <button data-action="underline" title="Underline" style="text-decoration: underline;">U</button>
         <div class="separator"></div>
-        <button data-action="bold-italic" title="Bold+Italic (Cmd/Ctrl+Shift+B)" style="font-family: serif; font-size: 11px; font-weight: bold;">B/I</button>
-        <button data-action="bold-underline" title="Bold+Underline (Cmd/Ctrl+Shift+U)" style="font-family: serif; text-decoration: underline;">𝗕</button>
-        <button data-action="italic-underline" title="Italic+Underline (Cmd/Ctrl+Shift+I)" style="font-family: serif; text-decoration: underline;">𝘐</button>
+        <button data-action="bold-italic" title="Bold+Italic" style="font-family: serif; font-size: 11px; font-weight: bold;">B/I</button>
+        <button data-action="bold-underline" title="Bold+Underline" style="font-family: serif; text-decoration: underline;">𝗕</button>
+        <button data-action="italic-underline" title="Italic+Underline" style="font-family: serif; text-decoration: underline;">𝘐</button>
         <div class="separator"></div>
-        <button data-action="bullet-circle" title="Circle Bullets (Cmd/Ctrl+8)" style="font-size: 16px;">•</button>
-        <button data-action="bullet-hyphen" title="Hyphen Bullets (Cmd/Ctrl+7)" style="font-size: 16px;">-</button>
+        <button data-action="bullet-circle" title="Circle Bullets" style="font-size: 16px;">•</button>
+        <button data-action="bullet-hyphen" title="Hyphen Bullets" style="font-size: 16px;">-</button>
         <button data-action="bullet-numbered" title="Numbered Bullets" style="font-size: 16px;">1.</button>
+        <div class="separator"></div>
+        <button data-action="uppercase" title="UPPERCASE" style="font-size: 14px;">AA</button>
+        <button data-action="lowercase" title="lowercase" style="font-size: 14px;">aa</button>
         <div class="separator"></div>
         <button data-action="clear-formatting" title="Verwijder opmaak (Clear formatting)" style="font-size: 15px;">✖️</button>
         <div style="flex: 1;"></div>
-        <button data-action="show-info" title="Toon sneltoetsen info" style="font-size: 16px; font-weight: bold;">?</button>
+        <button data-action="show-info" title="Toon info" style="font-size: 16px; font-weight: bold;">?</button>
     `;
     
     // Add click handlers
@@ -729,7 +613,7 @@ function handleToolbarClick(event) {
         console.log('Selected text:', selectedText);
 
         if (action === 'show-info') {
-            showShortcutsInfoPopup();
+            showInfoPopup();
             return;
         }
         
@@ -797,6 +681,12 @@ function handleToolbarClick(event) {
                 break;
             case 'bullet-numbered':
                 convertedText = convertToNumberedBulletPoints(selectedText);
+                break;
+            case 'uppercase':
+                convertedText = convertToUppercase(selectedText);
+                break;
+            case 'lowercase':
+                convertedText = convertToLowercase(selectedText);
                 break;
         }
         
@@ -910,14 +800,14 @@ function updateToolbarButtonStates(selectedText, toolbar) {
     // Functionaliteit uitgeschakeld - geen active states meer
     return;
 }
-// Show a popup with keyboard shortcut info
-function showShortcutsInfoPopup() {
+// Show a popup with formatting options info
+function showInfoPopup() {
     // Remove any existing popup
-    const old = document.getElementById('linkedin-formatter-shortcuts-popup');
+    const old = document.getElementById('linkedin-formatter-info-popup');
     if (old) old.remove();
     
     const popup = document.createElement('div');
-    popup.id = 'linkedin-formatter-shortcuts-popup';
+    popup.id = 'linkedin-formatter-info-popup';
     popup.style.position = 'fixed';
     popup.style.top = '50%';
     popup.style.left = '50%';
@@ -934,86 +824,40 @@ function showShortcutsInfoPopup() {
     
     popup.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-            <div style="font-size: 18px; font-weight: 600; color: #343a40;">Keyboard Shortcuts</div>
+            <div style="font-size: 18px; font-weight: 600; color: #343a40;">Formatting Options</div>
             <div style="cursor: pointer; font-size: 18px; color: #6c757d; font-weight: bold; transition: color 0.2s; padding: 4px;" id="linkedin-formatter-close-x" onmouseover="this.style.color='#495057'" onmouseout="this.style.color='#6c757d'">&times;</div>
         </div>
         <div style="border-bottom: 1px solid #dee2e6; margin: 0 -24px 16px -24px;"></div>
         <div style="font-size: 14px; line-height: 1.8; color: #495057;">
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; gap: 2px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Cmd/Ctrl</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">B</span>
-                </div>
-                <span>Bold</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; gap: 2px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Cmd/Ctrl</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">I</span>
-                </div>
-                <span>Italic</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; gap: 2px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Cmd/Ctrl</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">U</span>
-                </div>
-                <span>Underline</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; gap: 2px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Cmd/Ctrl</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Shift</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">B</span>
-                </div>
-                <span>Bold + Italic</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; gap: 2px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Cmd/Ctrl</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Shift</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">U</span>
-                </div>
-                <span>Bold + Underline</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; gap: 2px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Cmd/Ctrl</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Shift</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">I</span>
-                </div>
-                <span>Italic + Underline</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; gap: 2px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Cmd/Ctrl</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">8</span>
-                </div>
-                <span>Circle Bullets (•)</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; gap: 2px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">Cmd/Ctrl</span>
-                    <span style="color: #6c757d;">+</span>
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: #495057;">7</span>
-                </div>
-                <span>Hyphen Bullets (-)</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 0px;">
-                <div style="display: flex; gap: 4px; min-width: 160px;">
-                    <span style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 3px; padding: 2px 6px; font-size: 12px; font-weight: 600; color: #495057;">✖️</span>
-                </div>
-                <span>Clear all formatting</span>
+            <p>Select text in your LinkedIn post and use the toolbar buttons to format your text.</p>
+            <p style="margin-bottom: 10px;">Available formatting options:</p>
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center;">
+                <div style="text-align: center; font-size: 16px;">𝗕</div>
+                <div>Bold text</div>
+                
+                <div style="text-align: center; font-size: 16px;">𝘐</div>
+                <div>Italic text</div>
+                
+                <div style="text-align: center; font-size: 16px;">U</div>
+                <div>Underlined text</div>
+                
+                <div style="text-align: center; font-size: 16px;">•</div>
+                <div>Circle bullet points</div>
+                
+                <div style="text-align: center; font-size: 16px;">-</div>
+                <div>Hyphen bullet points</div>
+                
+                <div style="text-align: center; font-size: 16px;">1.</div>
+                <div>Numbered lists</div>
+                
+                <div style="text-align: center; font-size: 16px;">AA</div>
+                <div>UPPERCASE text</div>
+                
+                <div style="text-align: center; font-size: 16px;">aa</div>
+                <div>lowercase text</div>
+                
+                <div style="text-align: center; font-size: 16px;">✖️</div>
+                <div>Clear formatting</div>
             </div>
         </div>
     `;

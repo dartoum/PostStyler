@@ -25,81 +25,73 @@
             line-height: 1.5;
             margin-bottom: 10px;
         }
-        .shortcut-list {
+        .feature-list {
             list-style: none;
             padding: 0;
             margin: 15px 0;
         }
-        .shortcut-list li {
+        .feature-list li {
             background-color: #ffffff;
             border: 1px solid #e0e0e0;
             border-radius: 5px;
             padding: 10px 15px;
             margin-bottom: 8px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .shortcut-list li strong {
+        .feature-list li strong {
             color: #005682;
             font-weight: 500;
+            margin-left: 10px;
         }
-        .shortcut-list li span {
-            font-family: 'Consolas', 'Courier New', monospace;
-            background-color: #eee;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 1em;
-            color: #414141;
+        .feature-icon {
+            width: 24px;
+            text-align: center;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
     <h1>LinkedIn text Formatter</h1>
-    <p>Select text in the LinkedIn post field and use these shortcuts, or use the floating toolbar:</p>
+    <p>Select text in the LinkedIn post field and use the toolbar buttons to format your text:</p>
 
-    <h3 style="color: #0077B5; margin-top: 20px; margin-bottom: 10px; font-size: 1em;">Basic Shortcuts:</h3>
-    <ul class="shortcut-list">
+    <ul class="feature-list">
         <li>
-            <strong>Bold</strong>
-            <span>Cmd/Ctrl + B</span>
+            <div class="feature-icon">𝗕</div>
+            <strong>Bold text</strong>
         </li>
         <li>
-            <strong>Italic</strong>
-            <span>Cmd/Ctrl + I</span>
+            <div class="feature-icon">𝘐</div>
+            <strong>Italic text</strong>
         </li>
         <li>
-            <strong>Underline</strong>
-            <span>Cmd/Ctrl + U</span>
+            <div class="feature-icon">U</div>
+            <strong>Underlined text</strong>
         </li>
         <li>
-            <strong>Bullet Points (•)</strong>
-            <span>Cmd/Ctrl + 8</span>
+            <div class="feature-icon">•</div>
+            <strong>Bullet points (circle)</strong>
         </li>
         <li>
-            <strong>Bullet Points (-)</strong>
-            <span>Cmd/Ctrl + 7</span>
-        </li>
-    </ul>
-
-    <h3 style="color: #0077B5; margin-top: 20px; margin-bottom: 10px; font-size: 1em;">Advanced Combinations:</h3>
-    <ul class="shortcut-list">
-        <li>
-            <strong>Bold + Italic</strong>
-            <span>Cmd/Ctrl + Shift + B</span>
+            <div class="feature-icon">-</div>
+            <strong>Bullet points (hyphen)</strong>
         </li>
         <li>
-            <strong>Bold + Underline</strong>
-            <span>Cmd/Ctrl + Shift + U</span>
+            <div class="feature-icon">1.</div>
+            <strong>Numbered list</strong>
         </li>
         <li>
-            <strong>Italic + Underline</strong>
-            <span>Cmd/Ctrl + Shift + I</span>
+            <div class="feature-icon">AA</div>
+            <strong>UPPERCASE text</strong>
         </li>
         <li>
-            <strong>Bold + Italic + Underline</strong>
-            <span>Cmd/Ctrl + Shift + 7</span>
+            <div class="feature-icon">aa</div>
+            <strong>lowercase text</strong>
+        </li>
+        <li>
+            <div class="feature-icon">✖️</div>
+            <strong>Clear formatting</strong>
         </li>
     </ul>
 
