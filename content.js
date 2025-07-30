@@ -255,13 +255,13 @@ function convertToLowercase(text) {
 function convertStyledToCase(text, caseType) {
     // Convert to plain text to get the base characters
     const plain = convertToPlainText(text);
-    
+
     // Apply case conversion
     const converted = caseType === 'upper'
         ? plain.toUpperCase()
         : plain.toLowerCase();
-    
-    // Reapply the original formatting
+
+    // Reapply the original formatting character by character
     return reapplyFormatting(text, converted);
 }
 
@@ -272,28 +272,51 @@ function convertStyledToCase(text, caseType) {
  * @returns {string} Converted text with original formatting
  */
 function reapplyFormatting(original, converted) {
-    // Create a mapping of original characters to their positions
     const origChars = Array.from(original);
     const convChars = Array.from(converted);
-    
+
     let result = '';
-    let origIndex = 0;
-    
-    for (const char of convChars) {
-        // Find matching character in original text
-        while (origIndex < origChars.length) {
-            const origChar = origChars[origIndex];
-            const plainChar = convertToPlainText(origChar);
-            
-            if (plainChar === char) {
-                result += origChar;
-                origIndex++;
-                break;
+    let convIndex = 0;
+
+    for (let i = 0; i < origChars.length && convIndex < convChars.length; i++) {
+        const origChar = origChars[i];
+        const plainChar = convertToPlainText(origChar);
+
+        // Skip whitespace in original that doesn't exist in converted
+        if (plainChar === ' ' && convChars[convIndex] !== ' ') {
+            result += origChar;
+            continue;
+        }
+
+        // Find matching character in converted text
+        if (plainChar === convChars[convIndex]) {
+            result += origChar;
+            convIndex++;
+        } else if (plainChar === ' ') {
+            // Keep original whitespace
+            result += origChar;
+        } else {
+            // Try to find a match in the converted text
+            let foundMatch = false;
+            for (let j = convIndex; j < convChars.length; j++) {
+                if (convChars[j] === plainChar) {
+                    // Add the original characters up to this point
+                    for (let k = i; k < origChars.length && convertToPlainText(origChars[k]) === ' '; k++) {
+                        result += origChars[k];
+                    }
+                    result += origChar;
+                    convIndex = j + 1;
+                    foundMatch = true;
+                    break;
+                }
             }
-            origIndex++;
+            if (!foundMatch) {
+                // If no match found, just add the original character
+                result += origChar;
+            }
         }
     }
-    
+
     return result;
 }
 
@@ -415,10 +438,31 @@ function isAllUnderlineItalic(text) {
          * @param {Range} range The selection range
          * @param {string} newText The text to insert
          */
+        /**
+         * Replaces selected text while preserving surrounding content
+         * @param {Range} range The selection range
+         * @param {string} newText The text to insert
+         */
         function replaceSelectedText(range, newText) {
-            range.deleteContents();
+            // Get the common ancestor container
+            const commonAncestor = range.commonAncestorContainer;
+        
+            // Create a document fragment to hold the new content
+            const fragment = document.createDocumentFragment();
+        
+            // Create text node for the new text
             const textNode = document.createTextNode(newText);
-            range.insertNode(textNode);
+            fragment.appendChild(textNode);
+        
+            // Replace the selection with the fragment
+            range.deleteContents();
+            range.insertNode(fragment);
+        
+            // Return the new range
+            const newRange = document.createRange();
+            newRange.setStartAfter(textNode);
+            newRange.setEndAfter(textNode);
+            return newRange;
         }
     }
     return /\u0332/.test(text) && arr.some(char => italicSet.has(char));
