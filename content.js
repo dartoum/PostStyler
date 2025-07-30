@@ -304,7 +304,8 @@ function createCharacterMap(text) {
  * @returns {boolean} True if it's a special character
  */
 function isUnicodeSpecialChar(char) {
-    return /[\u0332\u{1D400}-\u{1D7FF}\u{1D800}-\u{1DBFF}\u{1DC00}-\u{1DFFF}\u{1E000}-\u{1EFFF}•-]/.test(char);
+    // Check for combining characters and other Unicode special characters
+    return /[\u0332-\u036F\u1D400-\u1D7FF\u1D800-\u1DBFF\u1DC00-\u1DFFF\u1E000-\u1EFFF•-]/.test(char);
 }
 
 /**
