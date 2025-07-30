@@ -606,7 +606,7 @@ function handleToolbarClick(event) {
 
         const transformedText = transformFunction(selectedText);
         
-        // Store the original selection boundaries
+        // Store the range information before making changes
         const startContainer = range.startContainer;
         const startOffset = range.startOffset;
         const endContainer = range.endContainer;
@@ -619,20 +619,41 @@ function handleToolbarClick(event) {
         const textNode = document.createTextNode(transformedText);
         range.insertNode(textNode);
         
-        // Create a new range that selects the inserted text
-        const newRange = document.createRange();
-        newRange.setStart(textNode, 0);
-        newRange.setEnd(textNode, transformedText.length);
+        // Function to restore selection
+        const restoreSelection = () => {
+            try {
+                // Create a new range that selects the inserted text
+                const newRange = document.createRange();
+                newRange.setStart(textNode, 0);
+                newRange.setEnd(textNode, transformedText.length);
+                
+                // Clear existing selection and apply new one
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+                
+                // Ensure the text area remains focused
+                textArea.focus();
+                
+                console.log('Selection restored to transformed text');
+            } catch (e) {
+                console.error('Error restoring selection:', e);
+            }
+        };
         
-        // Apply the selection
-        selection.removeAllRanges();
-        selection.addRange(newRange);
+        // Try to restore selection immediately
+        restoreSelection();
         
-        // Ensure the text area remains focused
-        textArea.focus();
+        // Also try after a short delay to handle any interference from LinkedIn
+        setTimeout(restoreSelection, 10);
+        setTimeout(restoreSelection, 50);
         
-        // Dispatch an input event to ensure LinkedIn registers the change
+        // Dispatch input event to ensure LinkedIn registers the change
         textArea.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // Prevent any default behavior that might interfere
+        event.preventDefault();
+        event.stopPropagation();
 
     } catch (e) {
         console.error("Error executing text transformation:", e);
