@@ -606,13 +606,29 @@ function handleToolbarClick(event) {
 
         const transformedText = transformFunction(selectedText);
         
-        // Replace the selected content with the transformed text
-        range.deleteContents();
-        range.insertNode(document.createTextNode(transformedText));
+        // Store the start and end positions of the current range
+        const startContainer = range.startContainer;
+        const startOffset = range.startOffset;
+        const endContainer = range.endContainer;
+        const endOffset = range.endOffset;
         
-        // Select the newly inserted text
+        // Delete the original selected text
+        range.deleteContents();
+        
+        // Create a new text node with the transformed content
+        const textNode = document.createTextNode(transformedText);
+        
+        // Insert the new node at the cursor's position
+        range.insertNode(textNode);
+        
+        // Create a new range that selects the entire transformed text
+        const newRange = document.createRange();
+        newRange.setStart(textNode, 0);
+        newRange.setEnd(textNode, transformedText.length);
+        
+        // Apply the new selection
         selection.removeAllRanges();
-        selection.addRange(range);
+        selection.addRange(newRange);
         
         // Ensure the text area remains focused
         textArea.focus();
