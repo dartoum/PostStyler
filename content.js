@@ -605,17 +605,12 @@ function handleToolbarClick(event) {
         if (!selectedText) return;
 
         const transformedText = transformFunction(selectedText);
-        
-        range.deleteContents();
-        
-        const textNode = document.createTextNode(transformedText);
-        range.insertNode(textNode);
 
-        // Reselect the new text
-        const newRange = document.createRange();
-        newRange.selectNodeContents(textNode);
-        selection.removeAllRanges();
-        selection.addRange(newRange);
+        // Use document.execCommand for robust text insertion and selection handling.
+        // This command replaces the selected text with the new text and,
+        // in most modern browsers, leaves the newly inserted text selected.
+        document.execCommand('insertText', false, transformedText);
+
     } catch (e) {
         console.error("Error executing text transformation:", e);
     }
