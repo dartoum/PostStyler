@@ -4,12 +4,6 @@
  * @param {string} text The input string to convert.
  * @returns {string} The converted string.
  */
-function convertToBoldItalic(text) {
-    // Eerst ALLES naar plain tekst converteren
-    let plain = convertToPlainText(text);
-    // Dan alleen bold+italic toepassen (laatste actie wint)
-    return Array.from(plain).map(char => unicodeBoldItalicMap[char] || char).join('');
-}
 
 // content.js
 
@@ -17,11 +11,6 @@ function convertToBoldItalic(text) {
 // These maps contain the Unicode equivalents for bold, italic, and underlined characters.
 // They cover common Latin letters (uppercase and lowercase) and digits.
 
-const unicodeBoldItalicMap = {
-    'A': '𝙰', 'B': '𝙱', 'C': '𝙲', 'D': '𝙳', 'E': '𝙴', 'F': '𝙵', 'G': '𝙶', 'H': '𝙷', 'I': '𝙸', 'J': '𝙹', 'K': '𝙺', 'L': '𝙻', 'M': '𝙼', 'N': '𝙽', 'O': '𝙾', 'P': '𝙿', 'Q': '𝚀', 'R': '𝚁', 'S': '𝚂', 'T': '𝚃', 'U': '𝚄', 'V': '𝚅', 'W': '𝚆', 'X': '𝚇', 'Y': '𝚈', 'Z': '𝚉',
-    'a': '𝙖', 'b': '𝙗', 'c': '𝙘', 'd': '𝙙', 'e': '𝙚', 'f': '𝙛', 'g': '𝙜', 'h': '𝙝', 'i': '𝙞', 'j': '𝙟', 'k': '𝙠', 'l': '𝙡', 'm': '𝙢', 'n': '𝙣', 'o': '𝙤', 'p': '𝙥', 'q': '𝙦', 'r': '𝙧', 's': '𝙨', 't': '𝙩', 'u': '𝙪', 'v': '𝙫', 'w': '𝙬', 'x': '𝙭', 'y': '𝙮', 'z': '𝙯'
-    // Note: There are no standard Unicode bold-italic digits
-};
 
 const unicodeBoldMap = {
     'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚', 'H': '𝗛', 'I': '𝗜', 'J': '𝗝', 'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡', 'O': '𝗢', 'P': '𝗣', 'Q': '𝗤', 'R': '𝗥', 'S': '𝗦', 'T': '𝗧', 'U': '𝗨', 'V': '𝗩', 'W': '𝗪', 'X': '𝗫', 'Y': '𝗬', 'Z': '𝗭',
@@ -265,24 +254,30 @@ function convertToLowercase(text) {
 
 function convertToPlainText(text) {
     // Quick check: als de text geen Unicode formatting karakters bevat, return origineel
-    if (!(/[\u0332\u{1D400}-\u{1D7FF}•-]/u.test(text))) {
+    if (!(/[\u0332\u{1D400}-\u{1D7FF}\u{1D800}-\u{1DBFF}\u{1DC00}-\u{1DFFF}\u{1E000}-\u{1EFFF}•-]/u.test(text))) {
+        console.log('No Unicode formatting detected, returning original text');
         return text;
     }
-    
+
     let plain = text;
-    
+
     // Remove all underlines first
     plain = removeUnderline(plain);
-    
+    console.log('After removing underline:', plain);
+
     // Remove all Unicode styles
     plain = demapUnicode(plain, unicodeBoldMap);
+    console.log('After removing bold:', plain);
     plain = demapUnicode(plain, unicodeItalicMap);
-    plain = demapUnicode(plain, unicodeBoldItalicMap);
+    console.log('After removing italic:', plain);
+    console.log('After removing bold+italic:', plain);
     plain = demapUnicode(plain, unicodeMonospaceMap);
-    
+    console.log('After removing monospace:', plain);
+
     // Remove bullets
     plain = removeBullets(plain);
-    
+    console.log('After removing bullets:', plain);
+
     return plain;
 }
 
@@ -310,10 +305,6 @@ function isAllStyled(text, unicodeMap) {
     return Array.from(text).every(char => unicodeValues.has(char) || !(/[a-zA-Z]/.test(char)));
 }
 
-function isAllBoldItalic(text) {
-    const unicodeValues = new Set(Object.values(unicodeBoldItalicMap));
-    return Array.from(text).every(char => unicodeValues.has(char) || !(/[a-zA-Z]/.test(char)));
-}
 
 function isAllBold(text) {
     const unicodeValues = new Set(Object.values(unicodeBoldMap));
@@ -377,21 +368,6 @@ function isAllUnderlineItalic(text) {
     return /\u0332/.test(text) && arr.some(char => italicSet.has(char));
 }
 
-function isAllBoldItalicUnderlined(text) {
-    // Check if all stylable chars are bold+italic+underlined
-    const boldItalicSet = new Set(Object.values(unicodeBoldItalicMap));
-    let arr = Array.from(text);
-    for (let i = 0; i < arr.length - 1; i++) {
-        if (/[a-zA-Z]/.test(arr[i])) { // Only check stylable chars (no bold-italic digits)
-            if (boldItalicSet.has(arr[i]) && arr[i + 1] === COMBINING_LOW_LINE) {
-                i++; // skip underline
-            } else {
-                return false;
-            }
-        }
-    }
-    return /\u0332/.test(text) && arr.some(char => boldItalicSet.has(char));
-}
 
 function isAllCircleBulleted(text) {
     // Checks if all non-empty lines start with the bullet
@@ -548,7 +524,6 @@ function createToolbar() {
         <button data-action="italic" title="Italic" style="font-family: serif;">𝘐</button>
         <button data-action="underline" title="Underline" style="text-decoration: underline;">U</button>
         <div class="separator"></div>
-        <button data-action="bold-italic" title="Bold+Italic" style="font-family: serif; font-size: 11px; font-weight: bold;">B/I</button>
         <button data-action="bold-underline" title="Bold+Underline" style="font-family: serif; text-decoration: underline;">𝗕</button>
         <button data-action="italic-underline" title="Italic+Underline" style="font-family: serif; text-decoration: underline;">𝘐</button>
         <div class="separator"></div>
@@ -662,8 +637,6 @@ function handleToolbarClick(event) {
                 let plain = convertToPlainText(selectedText);
                 convertedText = convertToMonospaceUnderline(plain);
                 break;
-            case 'bold-italic':
-                convertedText = convertToBoldItalic(selectedText); break;
             case 'bold-underline':
                 convertedText = convertToUnderlineBold(selectedText); break;
             case 'italic-underline':
