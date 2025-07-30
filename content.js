@@ -603,14 +603,25 @@ function handleToolbarClick(event) {
 
         try {
             const fragment = range.extractContents();
-            transformTextNodes(fragment, transformFunction);
-            const newRange = document.createRange();
 
-            // Insert the transformed content and re-select it
+            // Add a marker to the end of the fragment to find the end of the selection later
+            const marker = document.createElement('span');
+            marker.id = 'selection-end-marker';
+            fragment.appendChild(marker);
+
+            transformTextNodes(fragment, transformFunction);
+            
+            // Insert the transformed content
             range.insertNode(fragment);
-            const lastChild = range.startContainer.childNodes[range.startOffset - 1];
-            if (lastChild) {
-                newRange.selectNodeContents(lastChild);
+
+            // Find the marker, create a new range, and remove the marker
+            const endMarker = document.getElementById('selection-end-marker');
+            if (endMarker) {
+                const newRange = document.createRange();
+                newRange.setStart(range.startContainer, range.startOffset);
+                newRange.setEndBefore(endMarker);
+                endMarker.remove();
+
                 selection.removeAllRanges();
                 selection.addRange(newRange);
             }
