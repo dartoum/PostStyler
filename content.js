@@ -606,29 +606,41 @@ function handleToolbarClick(event) {
 
         const transformedText = transformFunction(selectedText);
         
-        // Store original range boundaries for restoration
+        // Store the original range start and end positions
         const startContainer = range.startContainer;
         const startOffset = range.startOffset;
+        const endContainer = range.endContainer;
+        const endOffset = range.endOffset;
         
-        // Delete the original selected text
+        // Delete the selected content
         range.deleteContents();
         
-        // Create a new text node with the transformed content
+        // Create and insert the transformed text
         const textNode = document.createTextNode(transformedText);
-        
-        // Insert the new node at the range position
         range.insertNode(textNode);
         
-        // Create a new range that encompasses the entire transformed text
+        // Create a new range that selects the entire inserted text
         const newRange = document.createRange();
-        newRange.selectNodeContents(textNode);
+        newRange.setStart(textNode, 0);
+        newRange.setEnd(textNode, transformedText.length);
         
-        // Clear existing selection and apply new selection
+        // Apply the selection
         selection.removeAllRanges();
         selection.addRange(newRange);
         
-        // Ensure the text area remains focused
+        // Force focus back to the text area
         textArea.focus();
+        
+        // Trigger a small delay to ensure selection is properly applied
+        setTimeout(() => {
+            if (selection.rangeCount === 0 || selection.isCollapsed) {
+                // If selection was lost, reselect the text node
+                const finalRange = document.createRange();
+                finalRange.selectNodeContents(textNode);
+                selection.removeAllRanges();
+                selection.addRange(finalRange);
+            }
+        }, 10);
 
     } catch (e) {
         console.error("Error executing text transformation:", e);
