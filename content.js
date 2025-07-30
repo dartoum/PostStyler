@@ -606,18 +606,23 @@ function handleToolbarClick(event) {
 
         const transformedText = transformFunction(selectedText);
         
-        // Create a temporary element to hold the transformed text
-        const tempSpan = document.createElement('span');
-        tempSpan.setAttribute('data-temp-selection', 'true');
-        tempSpan.textContent = transformedText;
+        // Store the original selection boundaries
+        const startContainer = range.startContainer;
+        const startOffset = range.startOffset;
+        const endContainer = range.endContainer;
+        const endOffset = range.endOffset;
         
-        // Replace the selected content with our temporary span
+        // Replace the selected content with the transformed text
         range.deleteContents();
-        range.insertNode(tempSpan);
         
-        // Create a new range that selects the content of our span
+        // Insert the transformed text as a text node
+        const textNode = document.createTextNode(transformedText);
+        range.insertNode(textNode);
+        
+        // Create a new range that selects the inserted text
         const newRange = document.createRange();
-        newRange.selectNodeContents(tempSpan);
+        newRange.setStart(textNode, 0);
+        newRange.setEnd(textNode, transformedText.length);
         
         // Apply the selection
         selection.removeAllRanges();
@@ -626,8 +631,8 @@ function handleToolbarClick(event) {
         // Ensure the text area remains focused
         textArea.focus();
         
-        // We don't unwrap the span to keep the selection intact
-        // The span will remain in the DOM but won't affect the appearance
+        // Dispatch an input event to ensure LinkedIn registers the change
+        textArea.dispatchEvent(new Event('input', { bubbles: true }));
 
     } catch (e) {
         console.error("Error executing text transformation:", e);
