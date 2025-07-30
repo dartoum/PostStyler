@@ -33,6 +33,20 @@ const unicodeMonospaceMap = {
 // For underline, we use the combining low line character (U+0332) after each character.
 const COMBINING_LOW_LINE = '\u0332';
 
+const unicodeUpperMap = {
+    'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D', 'e': 'E', 'f': 'F', 'g': 'G', 'h': 'H', 'i': 'I', 'j': 'J', 'k': 'K', 'l': 'L', 'm': 'M', 'n': 'N', 'o': 'O', 'p': 'P', 'q': 'Q', 'r': 'R', 's': 'S', 't': 'T', 'u': 'U', 'v': 'V', 'w': 'W', 'x': 'X', 'y': 'Y', 'z': 'Z',
+    '𝗮': '𝗔', '𝗯': '𝗕', '𝗰': '𝗖', '𝗱': '𝗗', '𝗲': '𝗘', '𝗳': '𝗙', '𝗴': '𝗚', '𝗵': '𝗛', '𝗶': '𝗜', '𝗷': '𝗝', '𝗸': '𝗞', '𝗹': '𝗟', '𝗺': '𝗠', '𝗻': '𝗡', '𝗼': '𝗢', '𝗽': '𝗣', '𝗾': '𝗤', '𝗿': '𝗥', '𝘀': '𝗦', '𝘁': '𝗧', '𝘂': '𝗨', '𝘃': '𝗩', '𝘄': '𝗪', '𝘅': '𝗫', '𝘆': '𝗬', '𝘇': '𝗭',
+    '𝘢': '𝘈', '𝘣': '𝘉', '𝘤': '𝘊', '𝘥': '𝘋', '𝘦': '𝘌', '𝘧': '𝘍', '𝘨': '𝘎', '𝘩': '𝘏', '𝘪': '𝘐', '𝘫': '𝘑', '𝘬': '𝘒', '𝘭': '𝘓', '𝘮': '𝘔', '𝘯': '𝘕', '𝘰': '𝘖', '𝘱': '𝘗', '𝘲': '𝘘', '𝘳': '𝘙', '𝘴': '𝘚', '𝘵': '𝘛', '𝘶': '𝘜', '𝘷': '𝘝', '𝘸': '𝘞', '𝘹': '𝘟', '𝘺': '𝘠', '𝘻': '𝘡',
+    '𝖺': '𝖠', '𝖻': '𝖡', '𝖼': '𝖢', '𝖽': '𝖣', '𝖾': '𝖤', '𝖿': '𝖥', '𝗀': '𝖦', '𝗁': '𝖧', '𝗂': '𝖨', '𝗃': '𝖩', '𝗄': '𝖪', '𝗅': '𝖫', '𝗆': '𝖬', '𝗇': '𝖭', '𝗈': '𝖮', '𝗉': '𝖯', '𝗊': '𝖰', '𝗋': '𝖱', '𝗌': '𝖲', '𝗍': '𝖳', '𝗎': '𝖴', '𝗏': '𝖵', '𝗐': '𝖶', '𝗑': '𝖷', '𝗒': '𝖸', '𝗓': '𝖹'
+};
+
+const unicodeLowerMap = {
+    'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g', 'H': 'h', 'I': 'i', 'J': 'j', 'K': 'k', 'L': 'l', 'M': 'm', 'N': 'n', 'O': 'o', 'P': 'p', 'Q': 'q', 'R': 'r', 'S': 's', 'T': 't', 'U': 'u', 'V': 'v', 'W': 'w', 'X': 'x', 'Y': 'y', 'Z': 'z',
+    '𝗔': '𝗮', '𝗕': '𝗯', '𝗖': '𝗰', '𝗗': '𝗱', '𝗘': '𝗲', '𝗙': '𝗳', '𝗚': '𝗴', '𝗛': '𝗵', '𝗜': '𝗶', '𝗝': '𝗷', '𝗞': '𝗸', '𝗟': '𝗹', '𝗠': '𝗺', '𝗡': '𝗻', '𝗢': '𝗼', '𝗣': '𝗽', '𝗤': '𝗾', '𝗥': '𝗿', '𝗦': '𝘀', '𝗧': '𝘁', '𝗨': '𝘂', '𝗩': '𝘃', '𝗪': '𝘄', '𝗫': '𝘅', '𝗬': '𝘆', '𝗭': '𝘇',
+    '𝘈': '𝘢', '𝘉': '𝘣', '𝘊': '𝘤', '𝘋': '𝘥', '𝘌': '𝘦', '𝘍': '𝘧', '𝘎': '𝘨', '𝘏': '𝘩', '𝘐': '𝘪', '𝘑': '𝘫', '𝘒': '𝘬', '𝘓': '𝘭', '𝘔': '𝘮', '𝘕': '𝘯', '𝘖': '𝘰', '𝘗': '𝘱', '𝘘': '𝘲', '𝘙': '𝘳', '𝘚': '𝘴', '𝘛': '𝘵', '𝘜': '𝘶', '𝘝': '𝘷', '𝘞': '𝘸', '𝘟': '𝘹', '𝘠': '𝘺', '𝘡': '𝘻',
+    '𝖠': '𝖺', '𝖡': '𝖻', '𝖢': '𝖼', '𝖣': '𝖽', '𝖤': '𝖾', '𝖥': '𝖿', '𝖦': '𝗀', '𝖧': '𝗁', '𝖨': '𝗂', '𝖩': '𝗃', '𝖪': '𝗄', '𝖫': '𝗅', '𝖬': '𝗆', '𝖭': '𝗇', '𝖮': '𝗈', '𝖯': '𝗉', '𝖰': '𝗊', '𝖱': '𝗋', '𝖲': '𝗌', '𝖳': '𝗍', '𝖴': '𝗎', '𝖵': '𝗏', '𝖶': '𝗐', '𝖷': '𝗑', '𝖸': '𝗒', '𝖹': '𝗓'
+};
+
 // For bullet points, we use the standard Unicode bullet character.
 const UNICODE_BULLET_CIRCLE = '•';
 // For hyphen bullet points, we use the standard hyphen character.
@@ -234,7 +248,7 @@ function convertToBoldItalicUnderline(text) {
  * @returns {string} The converted uppercase string.
  */
 function convertToUppercase(text) {
-    return convertStyledToCase(text, 'upper');
+    return Array.from(text).map(char => unicodeUpperMap[char] || char).join('');
 }
 
 /**
@@ -243,78 +257,7 @@ function convertToUppercase(text) {
  * @returns {string} The converted lowercase string.
  */
 function convertToLowercase(text) {
-    return convertStyledToCase(text, 'lower');
-}
-
-/**
- * Converts styled text to uppercase/lowercase while preserving formatting
- * @param {string} text The input string to convert
- * @param {string} caseType 'upper' or 'lower'
- * @returns {string} Converted text with preserved styling
- */
-function convertStyledToCase(text, caseType) {
-    // Create a character mapping that preserves Unicode styling
-    const charMap = createCharacterMap(text);
-
-    // Apply case conversion while preserving styling
-    let result = '';
-    for (const [char, style] of charMap) {
-        let convertedChar = char;
-        if (char !== ' ' && !isUnicodeSpecialChar(char)) {
-            convertedChar = caseType === 'upper'
-                ? char.toUpperCase()
-                : char.toLowerCase();
-        }
-        result += style ? style + convertedChar : convertedChar;
-    }
-
-    return result;
-}
-
-/**
- * Creates a character map that preserves Unicode styling
- * @param {string} text The input text
- * @returns {Array} Array of [character, style] pairs
- */
-function createCharacterMap(text) {
-    const chars = Array.from(text);
-    const map = [];
-
-    for (let i = 0; i < chars.length; i++) {
-        const char = chars[i];
-
-        // Check for combining characters (Unicode styling)
-        let style = '';
-        if (i > 0 && isCombiningChar(char)) {
-            // This is a combining character (like underline)
-            style = char;
-            // Skip this character and apply it to the previous one
-            continue;
-        }
-
-        map.push([char, style]);
-    }
-
-    return map;
-}
-
-/**
- * Checks if a character is a Unicode special character (like combining marks)
- * @param {string} char The character to check
- * @returns {boolean} True if it's a special character
- */
-function isUnicodeSpecialChar(char) {
-    // Check for combining characters and other Unicode special characters
-    return /[\u0332-\u036F\u1D400-\u1D7FF\u1D800-\u1DBFF\u1DC00-\u1DFFF\u1E000-\u1EFFF•-]/.test(char);
-}
-
-/**
- * Checks if a character is a combining character
- * @param {string} char The character to check
- * @returns {boolean} True if it's a combining character
- */
-function isCombiningChar(char) {
-    return char === COMBINING_LOW_LINE;
+    return Array.from(text).map(char => unicodeLowerMap[char] || char).join('');
 }
 
 function convertToPlainText(text) {
@@ -430,39 +373,6 @@ function isAllUnderlineItalic(text) {
             }
         }
         
-        /**
-         * Replaces selected text while preserving surrounding content
-         * @param {Range} range The selection range
-         * @param {string} newText The text to insert
-         */
-        /**
-         * Replaces selected text while preserving surrounding content
-         * @param {Range} range The selection range
-         * @param {string} newText The text to insert
-         */
-        /**
-         * Replaces selected text while preserving surrounding content
-         * @param {Range} range The selection range
-         * @param {string} newText The text to insert
-         */
-        function replaceSelectedText(range, newText) {
-            // Create a document fragment to hold the new content
-            const fragment = document.createDocumentFragment();
-        
-            // Create text node for the new text
-            const textNode = document.createTextNode(newText);
-            fragment.appendChild(textNode);
-        
-            // Replace the selection with the fragment
-            range.deleteContents();
-            range.insertNode(fragment);
-        
-            // Return the new range
-            const newRange = document.createRange();
-            newRange.setStartAfter(textNode);
-            newRange.setEndAfter(textNode);
-            return newRange;
-        }
     }
     return /\u0332/.test(text) && arr.some(char => italicSet.has(char));
 }
@@ -653,137 +563,79 @@ function handleToolbarClick(event) {
     const action = event.target.dataset.action;
     if (!action) return;
 
-    // Vind de juiste toolbar en textarea
     const toolbar = event.currentTarget;
-    
-    // Direct zoeken: toolbar is altijd net boven de textarea geplaatst
     const textArea = toolbar.nextElementSibling;
     if (!textArea || !textArea.isContentEditable) {
-        console.log('Geen geldige textarea gevonden na toolbar');
+        console.log('Toolbar target textarea not found');
         return;
     }
-    
-    console.log('Toolbar click:', action, 'voor textArea:', textArea);
 
     textArea.focus();
-    
-    // Wacht even voor de focus en zorg dan voor een selectie
+
     setTimeout(() => {
         const selection = window.getSelection();
-        if (selection.rangeCount === 0) {
-            console.log('Geen selectie gevonden');
+        if (selection.rangeCount === 0 || selection.isCollapsed) {
+            console.log('No text selected');
             return;
         }
-        
+
         const range = selection.getRangeAt(0);
         if (!textArea.contains(range.commonAncestorContainer)) {
-            console.log('Selectie is niet in de juiste textarea');
+            console.log('Selection is not within the target textarea');
             return;
         }
-        
-        const selectedText = selection.toString();
-        console.log('Selected text:', selectedText);
 
-        // Info button has been removed
-        
-        if (action === 'clear-formatting') {
-            if (!selectedText) return;
-            
-            // Check of er daadwerkelijk formatting is om te verwijderen
-            let plain = convertToPlainText(selectedText);
-            
-            // Als de plain text identiek is aan de originele tekst, doe niets
-            if (plain === selectedText) {
-                console.log('Tekst is al plain, geen actie nodig');
-                return;
-            }
-            
-            // Als de plain text ook leeg is (alleen lege regels geselecteerd), doe niets
-            if (!plain.trim()) return;
-            
-            try {
-                // Probeer eerst execCommand - dit behoudt de DOM-structuur beter
-                const success = document.execCommand('insertText', false, plain);
-                if (!success) {
-                    // Fallback: directe text node vervanging
-                    range.deleteContents();
-                    const textNode = document.createTextNode(plain);
-                    range.insertNode(textNode);
-                    range.setStartAfter(textNode);
-                    range.collapse(true);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                }
-            } catch (e) {
-                console.error("Error clearing formatting:", e);
-            }
-            return;
-        }
-        
-        if (!selectedText) {
-            console.log('Geen tekst geselecteerd');
-            return;
-        }
-        
-        let convertedText = '';
+        let transformFunction;
         switch (action) {
-            case 'bold':
-                convertedText = convertToBold(selectedText); break;
-            case 'italic':
-                convertedText = convertToItalic(selectedText); break;
-            case 'underline':
-                // Underline: overschrijft andere stijlen (laatste actie wint)
-                let plain = convertToPlainText(selectedText);
-                convertedText = convertToMonospaceUnderline(plain);
-                break;
-            case 'bold-underline':
-                convertedText = convertToUnderlineBold(selectedText); break;
-            case 'italic-underline':
-                convertedText = convertToUnderlineItalic(selectedText); break;
-            case 'bullet-circle':
-                convertedText = convertToCircleBulletPoints(selectedText);
-                break;
-            case 'bullet-hyphen':
-                convertedText = convertToHyphenBulletPoints(selectedText);
-                break;
-            case 'bullet-numbered':
-                convertedText = convertToNumberedBulletPoints(selectedText);
-                break;
-            case 'uppercase':
-                convertedText = convertToUppercase(selectedText);
-                break;
-            case 'lowercase':
-                convertedText = convertToLowercase(selectedText);
-                break;
+            case 'bold': transformFunction = convertToBold; break;
+            case 'italic': transformFunction = convertToItalic; break;
+            case 'underline': transformFunction = (text) => convertToMonospaceUnderline(convertToPlainText(text)); break;
+            case 'bold-underline': transformFunction = convertToUnderlineBold; break;
+            case 'italic-underline': transformFunction = convertToUnderlineItalic; break;
+            case 'bullet-circle': transformFunction = convertToCircleBulletPoints; break;
+            case 'bullet-hyphen': transformFunction = convertToHyphenBulletPoints; break;
+            case 'bullet-numbered': transformFunction = convertToNumberedBulletPoints; break;
+            case 'uppercase': transformFunction = convertToUppercase; break;
+            case 'lowercase': transformFunction = convertToLowercase; break;
+            case 'clear-formatting': transformFunction = convertToPlainText; break;
+            default: return; // Unknown action
         }
-        
-        if (convertedText) {
-            console.log('Converting:', selectedText, '->', convertedText);
-            try {
-                replaceSelectedText(range, convertedText);
-                // Select the new text
-                const newRange = document.createRange();
-                newRange.setStart(range.startContainer, range.startOffset);
-                newRange.setEnd(range.startContainer, range.startOffset + convertedText.length);
+
+        try {
+            const fragment = range.extractContents();
+            transformTextNodes(fragment, transformFunction);
+            const newRange = document.createRange();
+
+            // Insert the transformed content and re-select it
+            range.insertNode(fragment);
+            const lastChild = range.startContainer.childNodes[range.startOffset - 1];
+            if (lastChild) {
+                newRange.selectNodeContents(lastChild);
                 selection.removeAllRanges();
                 selection.addRange(newRange);
-            } catch (e) {
-                // Laatste redmiddel: vervang de volledige inhoud van het contenteditable veld
-                const editable = toolbar.nextElementSibling;
-                if (editable && editable.isContentEditable) {
-                    editable.textContent = convertedText;
-                    const fallbackRange = document.createRange();
-                    fallbackRange.selectNodeContents(editable);
-                    selection.removeAllRanges();
-                    selection.addRange(fallbackRange);
-                    // Foutmelding niet tonen als fallback werkt
-                } else {
-                    // Alleen loggen als zelfs de fallback niet lukt
-                    console.error("Error executing text replacement:", e);
-                }
             }
+
+        } catch (e) {
+            console.error("Error executing text transformation:", e);
         }
     }, 10);
+}
+
+/**
+ * Recursively traverses a DOM node and applies a transformation function to all text nodes.
+ * @param {Node} node The node to traverse (e.g., a DocumentFragment).
+ * @param {Function} transform The function to apply to each text node's content.
+ */
+function transformTextNodes(node, transform) {
+    if (node.nodeType === Node.TEXT_NODE) {
+        node.textContent = transform(node.textContent);
+    } else {
+        // Use a static copy of child nodes for iteration as the list may change
+        const children = Array.from(node.childNodes);
+        for (const child of children) {
+            transformTextNodes(child, transform);
+        }
+    }
 }
 
 // Add toolbar to a LinkedIn text area
