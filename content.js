@@ -606,41 +606,28 @@ function handleToolbarClick(event) {
 
         const transformedText = transformFunction(selectedText);
         
-        // Store the original range start and end positions
-        const startContainer = range.startContainer;
-        const startOffset = range.startOffset;
-        const endContainer = range.endContainer;
-        const endOffset = range.endOffset;
+        // Create a temporary element to hold the transformed text
+        const tempSpan = document.createElement('span');
+        tempSpan.setAttribute('data-temp-selection', 'true');
+        tempSpan.textContent = transformedText;
         
-        // Delete the selected content
+        // Replace the selected content with our temporary span
         range.deleteContents();
+        range.insertNode(tempSpan);
         
-        // Create and insert the transformed text
-        const textNode = document.createTextNode(transformedText);
-        range.insertNode(textNode);
-        
-        // Create a new range that selects the entire inserted text
+        // Create a new range that selects the content of our span
         const newRange = document.createRange();
-        newRange.setStart(textNode, 0);
-        newRange.setEnd(textNode, transformedText.length);
+        newRange.selectNodeContents(tempSpan);
         
         // Apply the selection
         selection.removeAllRanges();
         selection.addRange(newRange);
         
-        // Force focus back to the text area
+        // Ensure the text area remains focused
         textArea.focus();
         
-        // Trigger a small delay to ensure selection is properly applied
-        setTimeout(() => {
-            if (selection.rangeCount === 0 || selection.isCollapsed) {
-                // If selection was lost, reselect the text node
-                const finalRange = document.createRange();
-                finalRange.selectNodeContents(textNode);
-                selection.removeAllRanges();
-                selection.addRange(finalRange);
-            }
-        }, 10);
+        // We don't unwrap the span to keep the selection intact
+        // The span will remain in the DOM but won't affect the appearance
 
     } catch (e) {
         console.error("Error executing text transformation:", e);
