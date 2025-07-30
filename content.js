@@ -253,71 +253,67 @@ function convertToLowercase(text) {
  * @returns {string} Converted text with preserved styling
  */
 function convertStyledToCase(text, caseType) {
-    // Convert to plain text to get the base characters
-    const plain = convertToPlainText(text);
+    // Create a character mapping that preserves Unicode styling
+    const charMap = createCharacterMap(text);
 
-    // Apply case conversion
-    const converted = caseType === 'upper'
-        ? plain.toUpperCase()
-        : plain.toLowerCase();
-
-    // Reapply the original formatting character by character
-    return reapplyFormatting(text, converted);
-}
-
-/**
- * Reapplies original formatting to case-converted text
- * @param {string} original Original styled text
- * @param {string} converted Case-converted plain text
- * @returns {string} Converted text with original formatting
- */
-function reapplyFormatting(original, converted) {
-    const origChars = Array.from(original);
-    const convChars = Array.from(converted);
-
+    // Apply case conversion while preserving styling
     let result = '';
-    let convIndex = 0;
-
-    for (let i = 0; i < origChars.length && convIndex < convChars.length; i++) {
-        const origChar = origChars[i];
-        const plainChar = convertToPlainText(origChar);
-
-        // Skip whitespace in original that doesn't exist in converted
-        if (plainChar === ' ' && convChars[convIndex] !== ' ') {
-            result += origChar;
-            continue;
+    for (const [char, style] of charMap) {
+        let convertedChar = char;
+        if (char !== ' ' && !isUnicodeSpecialChar(char)) {
+            convertedChar = caseType === 'upper'
+                ? char.toUpperCase()
+                : char.toLowerCase();
         }
-
-        // Find matching character in converted text
-        if (plainChar === convChars[convIndex]) {
-            result += origChar;
-            convIndex++;
-        } else if (plainChar === ' ') {
-            // Keep original whitespace
-            result += origChar;
-        } else {
-            // Try to find a match in the converted text
-            let foundMatch = false;
-            for (let j = convIndex; j < convChars.length; j++) {
-                if (convChars[j] === plainChar) {
-                    // Add the original characters up to this point
-                    for (let k = i; k < origChars.length && convertToPlainText(origChars[k]) === ' '; k++) {
-                        result += origChars[k];
-                    }
-                    result += origChar;
-                    convIndex = j + 1;
-                    foundMatch = true;
-                    break;
-                }
-            }
-            if (!foundMatch) {
-                // If no match found, just add the original character
-                result += origChar;
-            }
-        }
+        result += style ? style + convertedChar : convertedChar;
     }
 
     return result;
+}
+
+/**
+ * Creates a character map that preserves Unicode styling
+ * @param {string} text The input text
+ * @returns {Array} Array of [character, style] pairs
+ */
+function createCharacterMap(text) {
+    const chars = Array.from(text);
+    const map = [];
+
+    for (let i = 0; i < chars.length; i++) {
+        const char = chars[i];
+
+        // Check for combining characters (Unicode styling)
+        let style = '';
+        if (i > 0 && isCombiningChar(char)) {
+            // This is a combining character (like underline)
+            style = char;
+            // Skip this character and apply it to the previous one
+            continue;
+        }
+
+        map.push([char, style]);
+    }
+
+    return map;
+}
+
+/**
+ * Checks if a character is a Unicode special character (like combining marks)
+ * @param {string} char The character to check
+ * @returns {boolean} True if it's a special character
+ */
+function isUnicodeSpecialChar(char) {
+    return /[\u0332\u{1D400}-\u{1D7FF}\u{1D800}-\u{1DBFF}\u{1DC00}-\u{1DFFF}\u{1E000}-\u{1EFFF}•-]/.test(char);
+}
+
+/**
+ * Checks if a character is a combining character
+ * @param {string} char The character to check
+ * @returns {boolean} True if it's a combining character
+ */
+function isCombiningChar(char) {
+    return char === COMBINING_LOW_LINE;
 }
 
 function convertToPlainText(text) {
@@ -443,10 +439,12 @@ function isAllUnderlineItalic(text) {
          * @param {Range} range The selection range
          * @param {string} newText The text to insert
          */
+        /**
+         * Replaces selected text while preserving surrounding content
+         * @param {Range} range The selection range
+         * @param {string} newText The text to insert
+         */
         function replaceSelectedText(range, newText) {
-            // Get the common ancestor container
-            const commonAncestor = range.commonAncestorContainer;
-        
             // Create a document fragment to hold the new content
             const fragment = document.createDocumentFragment();
         
