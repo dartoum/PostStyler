@@ -572,80 +572,52 @@ function handleToolbarClick(event) {
 
     textArea.focus();
 
-    setTimeout(() => {
-        const selection = window.getSelection();
-        if (selection.rangeCount === 0 || selection.isCollapsed) {
-            console.log('No text selected');
-            return;
-        }
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0 || selection.isCollapsed) {
+        console.log('No text selected');
+        return;
+    }
 
-        const range = selection.getRangeAt(0);
-        if (!textArea.contains(range.commonAncestorContainer)) {
-            console.log('Selection is not within the target textarea');
-            return;
-        }
+    const range = selection.getRangeAt(0);
+    if (!textArea.contains(range.commonAncestorContainer)) {
+        console.log('Selection is not within the target textarea');
+        return;
+    }
 
-        let transformFunction;
-        switch (action) {
-            case 'bold': transformFunction = convertToBold; break;
-            case 'italic': transformFunction = convertToItalic; break;
-            case 'underline': transformFunction = (text) => convertToMonospaceUnderline(convertToPlainText(text)); break;
-            case 'bold-underline': transformFunction = convertToUnderlineBold; break;
-            case 'italic-underline': transformFunction = convertToUnderlineItalic; break;
-            case 'bullet-circle': transformFunction = convertToCircleBulletPoints; break;
-            case 'bullet-hyphen': transformFunction = convertToHyphenBulletPoints; break;
-            case 'bullet-numbered': transformFunction = convertToNumberedBulletPoints; break;
-            case 'uppercase': transformFunction = convertToUppercase; break;
-            case 'lowercase': transformFunction = convertToLowercase; break;
-            case 'clear-formatting': transformFunction = convertToPlainText; break;
-            default: return; // Unknown action
-        }
+    let transformFunction;
+    switch (action) {
+        case 'bold': transformFunction = convertToBold; break;
+        case 'italic': transformFunction = convertToItalic; break;
+        case 'underline': transformFunction = (text) => convertToMonospaceUnderline(convertToPlainText(text)); break;
+        case 'bold-underline': transformFunction = convertToUnderlineBold; break;
+        case 'italic-underline': transformFunction = convertToUnderlineItalic; break;
+        case 'bullet-circle': transformFunction = convertToCircleBulletPoints; break;
+        case 'bullet-hyphen': transformFunction = convertToHyphenBulletPoints; break;
+        case 'bullet-numbered': transformFunction = convertToNumberedBulletPoints; break;
+        case 'uppercase': transformFunction = convertToUppercase; break;
+        case 'lowercase': transformFunction = convertToLowercase; break;
+        case 'clear-formatting': transformFunction = convertToPlainText; break;
+        default: return; // Unknown action
+    }
 
-        try {
-            const fragment = range.extractContents();
+    try {
+        const selectedText = selection.toString();
+        if (!selectedText) return;
 
-            // Add a marker to the end of the fragment to find the end of the selection later
-            const marker = document.createElement('span');
-            marker.id = 'selection-end-marker';
-            fragment.appendChild(marker);
+        const transformedText = transformFunction(selectedText);
+        
+        range.deleteContents();
+        
+        const textNode = document.createTextNode(transformedText);
+        range.insertNode(textNode);
 
-            transformTextNodes(fragment, transformFunction);
-            
-            // Insert the transformed content
-            range.insertNode(fragment);
-
-            // Find the marker, create a new range, and remove the marker
-            const endMarker = document.getElementById('selection-end-marker');
-            if (endMarker) {
-                const newRange = document.createRange();
-                newRange.setStart(range.startContainer, range.startOffset);
-                newRange.setEndBefore(endMarker);
-                endMarker.remove();
-
-                selection.removeAllRanges();
-                selection.addRange(newRange);
-            }
-
-        } catch (e) {
-            console.error("Error executing text transformation:", e);
-        }
-    }, 10);
-}
-
-/**
- * Recursively traverses a DOM node and applies a transformation function to all text nodes.
- * @param {Node} node The node to traverse (e.g., a DocumentFragment).
- * @param {Function} transform The function to apply to each text node's content.
- */
-function transformTextNodes(node, transform) {
-    if (node.nodeType === Node.TEXT_NODE) {
-        node.textContent = transform(node.textContent);
-    } else {
-        // Use a static copy of child nodes for iteration as the list may change
-        const children = Array.from(node.childNodes);
-        for (const child of children) {
-            transformTextNodes(child, transform);
-        }
+        // Reselect the new text
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+    } catch (e) {
+        console.error("Error executing text transformation:", e);
     }
 }
 
