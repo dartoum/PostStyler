@@ -234,10 +234,7 @@ function convertToBoldItalicUnderline(text) {
  * @returns {string} The converted uppercase string.
  */
 function convertToUppercase(text) {
-    // First convert to plain text to remove any formatting
-    let plain = convertToPlainText(text);
-    // Then convert to uppercase
-    return plain.toUpperCase();
+    return convertStyledToCase(text, 'upper');
 }
 
 /**
@@ -246,10 +243,58 @@ function convertToUppercase(text) {
  * @returns {string} The converted lowercase string.
  */
 function convertToLowercase(text) {
-    // First convert to plain text to remove any formatting
-    let plain = convertToPlainText(text);
-    // Then convert to lowercase
-    return plain.toLowerCase();
+    return convertStyledToCase(text, 'lower');
+}
+
+/**
+ * Converts styled text to uppercase/lowercase while preserving formatting
+ * @param {string} text The input string to convert
+ * @param {string} caseType 'upper' or 'lower'
+ * @returns {string} Converted text with preserved styling
+ */
+function convertStyledToCase(text, caseType) {
+    // Convert to plain text to get the base characters
+    const plain = convertToPlainText(text);
+    
+    // Apply case conversion
+    const converted = caseType === 'upper'
+        ? plain.toUpperCase()
+        : plain.toLowerCase();
+    
+    // Reapply the original formatting
+    return reapplyFormatting(text, converted);
+}
+
+/**
+ * Reapplies original formatting to case-converted text
+ * @param {string} original Original styled text
+ * @param {string} converted Case-converted plain text
+ * @returns {string} Converted text with original formatting
+ */
+function reapplyFormatting(original, converted) {
+    // Create a mapping of original characters to their positions
+    const origChars = Array.from(original);
+    const convChars = Array.from(converted);
+    
+    let result = '';
+    let origIndex = 0;
+    
+    for (const char of convChars) {
+        // Find matching character in original text
+        while (origIndex < origChars.length) {
+            const origChar = origChars[origIndex];
+            const plainChar = convertToPlainText(origChar);
+            
+            if (plainChar === char) {
+                result += origChar;
+                origIndex++;
+                break;
+            }
+            origIndex++;
+        }
+    }
+    
+    return result;
 }
 
 function convertToPlainText(text) {
@@ -363,6 +408,17 @@ function isAllUnderlineItalic(text) {
             } else {
                 return false;
             }
+        }
+        
+        /**
+         * Replaces selected text while preserving surrounding content
+         * @param {Range} range The selection range
+         * @param {string} newText The text to insert
+         */
+        function replaceSelectedText(range, newText) {
+            range.deleteContents();
+            const textNode = document.createTextNode(newText);
+            range.insertNode(textNode);
         }
     }
     return /\u0332/.test(text) && arr.some(char => italicSet.has(char));
@@ -661,67 +717,13 @@ function handleToolbarClick(event) {
         if (convertedText) {
             console.log('Converting:', selectedText, '->', convertedText);
             try {
-                const success = document.execCommand('insertText', false, convertedText);
-                if (!success) {
-                    // Fallback: probeer opnieuw execCommand (soms werkt het alsnog)
-                    let fallbackSuccess = false;
-                    try {
-                        fallbackSuccess = document.execCommand('insertText', false, convertedText);
-                    } catch (e) {}
-                    if (!fallbackSuccess) {
-                        // Alleen textNode insertie als de selectie volledig binnen een textNode zit
-                        if (range.startContainer === range.endContainer && range.startContainer.nodeType === Node.TEXT_NODE) {
-                            try {
-                                range.deleteContents();
-                                const textNode = document.createTextNode(convertedText);
-                                range.insertNode(textNode);
-                                // Selecteer de nieuw ingevoegde tekst
-                                const newRange = document.createRange();
-                                newRange.setStart(textNode, 0);
-                                newRange.setEnd(textNode, textNode.length);
-                                selection.removeAllRanges();
-                                selection.addRange(newRange);
-                            } catch (e) {
-                                // Als er een DOMException optreedt, vervang de volledige inhoud van het contenteditable veld
-                                const editable = toolbar.nextElementSibling;
-                                if (editable && editable.isContentEditable) {
-                                    editable.textContent = convertedText;
-                                    const fallbackRange = document.createRange();
-                                    fallbackRange.selectNodeContents(editable);
-                                    selection.removeAllRanges();
-                                    selection.addRange(fallbackRange);
-                                }
-                            }
-                        } else {
-                            // Vervang de volledige inhoud van het contenteditable veld
-                            const editable = toolbar.nextElementSibling;
-                            if (editable && editable.isContentEditable) {
-                                editable.textContent = convertedText;
-                                const fallbackRange = document.createRange();
-                                fallbackRange.selectNodeContents(editable);
-                                selection.removeAllRanges();
-                                selection.addRange(fallbackRange);
-                            }
-                        }
-                    }
-                } else {
-                    // Als execCommand werkt, probeer selectie te herstellen
-                    // (werkt niet altijd, maar fallback is hierboven)
-                    // Probeer de selectie opnieuw te zetten
-                    const inputField = toolbar.nextElementSibling;
-                    if (inputField && inputField.isContentEditable) {
-                        const sel = window.getSelection();
-                        if (sel.rangeCount > 0) {
-                            const r = sel.getRangeAt(0);
-                            // Probeer de selectie opnieuw te zetten over de nieuwe tekst
-                            const length = convertedText.length;
-                            const endOffset = r.startOffset + length;
-                            r.setEnd(r.startContainer, endOffset);
-                            sel.removeAllRanges();
-                            sel.addRange(r);
-                        }
-                    }
-                }
+                replaceSelectedText(range, convertedText);
+                // Select the new text
+                const newRange = document.createRange();
+                newRange.setStart(range.startContainer, range.startOffset);
+                newRange.setEnd(range.startContainer, range.startOffset + convertedText.length);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
             } catch (e) {
                 // Laatste redmiddel: vervang de volledige inhoud van het contenteditable veld
                 const editable = toolbar.nextElementSibling;
