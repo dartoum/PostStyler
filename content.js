@@ -604,54 +604,100 @@ function handleToolbarClick(event) {
         const selectedText = selection.toString();
         if (!selectedText) return;
 
+        // Get the full text content of the textarea
+        const fullText = textArea.textContent || textArea.innerText || '';
+        
+        // Find the start and end positions of the selection in the full text
+        const selectionStart = fullText.indexOf(selectedText);
+        if (selectionStart === -1) {
+            console.log('Could not find selected text in full content');
+            return;
+        }
+        const selectionEnd = selectionStart + selectedText.length;
+        
+        // Apply the transformation
         const transformedText = transformFunction(selectedText);
         
-        // Store the range information before making changes
-        const startContainer = range.startContainer;
-        const startOffset = range.startOffset;
-        const endContainer = range.endContainer;
-        const endOffset = range.endOffset;
+        // Replace the selected text in the full content
+        const newFullText = fullText.substring(0, selectionStart) + transformedText + fullText.substring(selectionEnd);
         
-        // Replace the selected content with the transformed text
-        range.deleteContents();
+        // Update the textarea content
+        textArea.textContent = newFullText;
         
-        // Insert the transformed text as a text node
-        const textNode = document.createTextNode(transformedText);
-        range.insertNode(textNode);
-        
-        // Function to restore selection
-        const restoreSelection = () => {
+        // Function to restore selection based on character positions
+        const restoreSelectionByPosition = () => {
             try {
-                // Create a new range that selects the inserted text
-                const newRange = document.createRange();
-                newRange.setStart(textNode, 0);
-                newRange.setEnd(textNode, transformedText.length);
+                // Calculate new selection end position
+                const newSelectionStart = selectionStart;
+                const newSelectionEnd = selectionStart + transformedText.length;
                 
-                // Clear existing selection and apply new one
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(newRange);
+                // Create a range for the new selection
+                const walker = document.createTreeWalker(
+                    textArea,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
                 
-                // Ensure the text area remains focused
-                textArea.focus();
+                let currentPos = 0;
+                let startNode = null, startOffset = 0;
+                let endNode = null, endOffset = 0;
                 
-                console.log('Selection restored to transformed text');
+                // Find the start and end positions in the DOM
+                while (walker.nextNode()) {
+                    const node = walker.currentNode;
+                    const nodeLength = node.textContent.length;
+                    
+                    if (startNode === null && currentPos + nodeLength >= newSelectionStart) {
+                        startNode = node;
+                        startOffset = newSelectionStart - currentPos;
+                    }
+                    
+                    if (currentPos + nodeLength >= newSelectionEnd) {
+                        endNode = node;
+                        endOffset = newSelectionEnd - currentPos;
+                        break;
+                    }
+                    
+                    currentPos += nodeLength;
+                }
+                
+                if (startNode && endNode) {
+                    const newRange = document.createRange();
+                    newRange.setStart(startNode, startOffset);
+                    newRange.setEnd(endNode, endOffset);
+                    
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(newRange);
+                    
+                    console.log('Selection restored using position-based method');
+                }
             } catch (e) {
-                console.error('Error restoring selection:', e);
+                console.error('Error in position-based selection restore:', e);
             }
         };
         
-        // Try to restore selection immediately
-        restoreSelection();
+        // Restore selection immediately and with delays
+        setTimeout(() => {
+            restoreSelectionByPosition();
+            textArea.focus();
+        }, 0);
         
-        // Also try after a short delay to handle any interference from LinkedIn
-        setTimeout(restoreSelection, 10);
-        setTimeout(restoreSelection, 50);
+        setTimeout(() => {
+            restoreSelectionByPosition();
+            textArea.focus();
+        }, 10);
         
-        // Dispatch input event to ensure LinkedIn registers the change
+        setTimeout(() => {
+            restoreSelectionByPosition();
+            textArea.focus();
+        }, 100);
+        
+        // Dispatch input event
         textArea.dispatchEvent(new Event('input', { bubbles: true }));
         
-        // Prevent any default behavior that might interfere
+        // Prevent default behavior
         event.preventDefault();
         event.stopPropagation();
 
